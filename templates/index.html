@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div>
+  <form action="/" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" required>
+    <button type="submit">Upload</button>
+  </form>
+  {% if upload %}
+  <table style="width: 100%;">
+    <tr>
+      <td style="width: 50%; text-align: center;">
+        <p>source image</p>
+        <img src="{{ upload_path }}" alt="Source Image" style="max-width: 100%; height: auto;"/>
+      </td>
+      <td style="width: 50%; text-align: center;">
+        <p>predict image</p>
+        <img src="{{ image_path }}" alt="Prediction Image" style="max-width: 100%; height: auto;"/>
+      </td>
+    </tr>
+  </table>
+  {% endif %}
+</div>
+
+{% endblock %}
