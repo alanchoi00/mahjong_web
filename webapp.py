@@ -38,7 +38,7 @@ def predict_img():
         latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(folder_path, x)))
         prediction_filename = os.listdir(os.path.join(folder_path, latest_subfolder))[0]
 
-        return render_template('index.html', upload=True, upload_path=f"/uploads/{f.filename}", image_path=f"/detect/{latest_subfolder}/{prediction_filename}")
+        return render_template('index.html', upload=True, filename=f.filename, upload_path=f"/uploads/{f.filename}", image_path=f"/detect/{latest_subfolder}/{prediction_filename}")
 
     print('No File Provided')
     return render_template('index.html', error="No file provided.")
