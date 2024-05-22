@@ -3,7 +3,6 @@ from ultralytics import YOLO
 import os
 import cv2
 import argparse
-import time
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -13,9 +12,41 @@ DETECT_FOLDER = 'runs/detect'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(DETECT_FOLDER, exist_ok=True)
 
+tile_labels = [
+  'sd1', 'sd2', 'sd3', 'sd4', 'sd5', 'sd6', 'sd7', 'sd8', 'sd9',
+  'sb1', 'sb2', 'sb3', 'sb4', 'sb5', 'sb6', 'sb7', 'sb8', 'sb9',
+  'sc1', 'sc2', 'sc3', 'sc4', 'sc5', 'sc6', 'sc7', 'sc8', 'sc9',
+  'hwe', 'hws', 'hww', 'hwn', 'hdr', 'hdg', 'hdw',
+  'bs1', 'bs2', 'bs3', 'bs4',
+  'bf1', 'bf2', 'bf3', 'bf4'
+]
+
 @app.route("/")
-def hello_world():
+def index():
   return render_template('index.html')
+
+def process_detections(detections):
+  # Create a dictionary to store detection details
+  results = {}
+
+  for detection in detections:
+    detected_indices = detection.boxes.cls.cpu().numpy().astype(int)
+    detected_conf = detection.boxes.conf.cpu().numpy()
+    detected_boxes = detection.boxes.xyxy.cpu().numpy()
+
+    for idx, conf, box in zip(detected_indices, detected_conf, detected_boxes):
+      label = detection.names[idx]
+      if label not in results:
+        results[label] = {
+          "freq": 0,
+          "conf": [],
+          "boxes": []
+        }
+      results[label]["freq"] += 1
+      results[label]["conf"].append(conf.tolist())
+      results[label]["boxes"].append(box.tolist())
+
+  return results
 
 @app.route("/", methods=["GET", "POST"])
 def predict_img():
@@ -33,12 +64,17 @@ def predict_img():
         img = cv2.imread(filepath)
         model = YOLO('yolov9c.pt')
         detections = model(img, save=True)
-        folder_path = DETECT_FOLDER
-        subfolders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
-        latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(folder_path, x)))
-        prediction_filename = os.listdir(os.path.join(folder_path, latest_subfolder))[0]
 
-        return render_template('index.html', upload=True, filename=f.filename, upload_path=f"/uploads/{f.filename}", image_path=f"/detect/{latest_subfolder}/{prediction_filename}")
+        results = process_detections(detections)
+        print("Detection results:", results)
+        subfolders = [f for f in os.listdir(DETECT_FOLDER) if os.path.isdir(os.path.join(DETECT_FOLDER, f))]
+        latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(DETECT_FOLDER, x)))
+        prediction_filename = os.listdir(os.path.join(DETECT_FOLDER, latest_subfolder))[0]
+
+        return render_template('index.html', upload=True, filename=f.filename,
+                               upload_path=f"/uploads/{f.filename}",
+                               image_path=f"/detect/{latest_subfolder}/{prediction_filename}",
+                               )
 
     print('No File Provided')
     return render_template('index.html', error="No file provided.")
