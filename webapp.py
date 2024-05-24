@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory, Response
+from flask import Flask, render_template, request, send_from_directory, jsonify
 from ultralytics import YOLO
 import os
 import cv2
@@ -8,7 +8,7 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 DETECT_FOLDER = 'runs/detect'
 
-# Ensure the upload folder exists
+# Ensure the upload and detect folders exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(DETECT_FOLDER, exist_ok=True)
 
@@ -26,7 +26,6 @@ def index():
   return render_template('index.html')
 
 def process_detections(detections):
-  # Create a dictionary to store detection details
   results = {}
 
   for detection in detections:
@@ -48,38 +47,31 @@ def process_detections(detections):
 
   return results
 
-@app.route("/", methods=["GET", "POST"])
-def predict_img():
-  if request.method == "POST":
-    if 'upload_file' in request.files:
-      f = request.files['upload_file']
-      basepath = os.path.dirname(__file__)
-      filepath = os.path.join(basepath, UPLOAD_FOLDER, f.filename)
-      print("Upload folder is ", filepath)
-      f.save(filepath)
+@app.route("/upload", methods=["POST"])
+def upload_img():
+  if 'upload_file' in request.files:
+    f = request.files['upload_file']
+    filepath = os.path.join(UPLOAD_FOLDER, f.filename)
+    f.save(filepath)
+    return jsonify({'filename': f.filename, 'upload_path': f"/uploads/{f.filename}"})
+  return jsonify({'error': 'No file provided.'}), 400
 
-      file_extension = f.filename.rsplit('.', 1)[1].lower()
+@app.route("/predict/<filename>", methods=["GET"])
+def predict_img(filename):
+  filepath = os.path.join(UPLOAD_FOLDER, filename)
+  img = cv2.imread(filepath)
+  model = YOLO('yolov9c.pt')
+  detections = model(img, save=True)
 
-      if file_extension == 'jpg':
-        img = cv2.imread(filepath)
-        model = YOLO('yolov9c.pt')
-        detections = model(img, save=True)
+  results = process_detections(detections)
+  subfolders = [f for f in os.listdir(DETECT_FOLDER) if os.path.isdir(os.path.join(DETECT_FOLDER, f))]
+  latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(DETECT_FOLDER, x)))
+  prediction_filename = os.listdir(os.path.join(DETECT_FOLDER, latest_subfolder))[0]
 
-        results = process_detections(detections)
-        print("Detection results:", results)
-        subfolders = [f for f in os.listdir(DETECT_FOLDER) if os.path.isdir(os.path.join(DETECT_FOLDER, f))]
-        latest_subfolder = max(subfolders, key=lambda x: os.path.getctime(os.path.join(DETECT_FOLDER, x)))
-        prediction_filename = os.listdir(os.path.join(DETECT_FOLDER, latest_subfolder))[0]
-
-        return render_template('index.html', upload=True, filename=f.filename,
-                               upload_path=f"/uploads/{f.filename}",
-                               image_path=f"/detect/{latest_subfolder}/{prediction_filename}",
-                               )
-
-    print('No File Provided')
-    return render_template('index.html', error="No file provided.")
-
-  return render_template('index.html')
+  return jsonify({
+    'prediction_path': f"/detect/{latest_subfolder}/{prediction_filename}",
+    'results': results
+  })
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -94,5 +86,4 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="Flask app exposing YOLOv9 models")
   parser.add_argument("--port", default=5000, type=int, help="port number")
   args = parser.parse_args()
-  model = YOLO('yolov9c.pt')
   app.run(debug=True, host="0.0.0.0", port=args.port)
