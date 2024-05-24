@@ -8,11 +8,11 @@
       <div class="mb-3">
         <label for="formFile" class="form-label">Choose a jpg file</label>
         <input class="form-control" type="file" id="formFile" name="upload_file" accept="image/jpg">
+        <button type="submit" class="btn btn-primary mt-1" disabled="true"
+          style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+          Upload
+        </button>
       </div>
-      <button type="submit" class="btn btn-primary" disabled="true"
-        style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
-        Upload
-      </button>
     </form>
     {% if upload %}
     <div>
