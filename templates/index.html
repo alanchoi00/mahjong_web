@@ -4,10 +4,15 @@
 <div class="container">
   <div class="card mahjong-theme" style="width: 30%;">
     <h2>File Upload</h2>
-    <form action="/" method="POST" enctype="multipart/form-data" class="upload-form">
-      <label for="file">Choose File</label>
-      <input type="file" id="file" name="file" required>
-      <button type="submit">Upload</button>
+    <form action="/" method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="formFile" class="form-label">Choose a jpg file</label>
+        <input class="form-control" type="file" id="formFile" name="upload_file" accept="image/jpg">
+        <button type="submit" class="btn btn-primary mt-1" disabled="true"
+          style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+          Upload
+        </button>
+      </div>
     </form>
     {% if upload %}
     <div>
@@ -17,7 +22,6 @@
     </div>
     {% endif %}
   </div>
-
   <div class="card mahjong-theme" style="width: 60%;">
     <h2>Result</h2>
     {% if upload %}
@@ -29,8 +33,12 @@
 </div>
 {% endblock %}
 
+{% block scripts %}
 <script>
-  document.querySelector('label[for="file"]').addEventListener('click', function() {
-    document.querySelector('input[type="file"]').click();
-  });
+  document.querySelector("input[type=file]").onchange = ({
+    target: { value },
+  }) => {
+    document.querySelector("button[type=submit]").disabled = !value;
+  };
 </script>
+{% endblock %}
