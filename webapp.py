@@ -17,6 +17,7 @@ def index():
   return render_template('index.html')
 
 def process_detections(detections):
+  conf_threshold = 0.6
   results = {}
 
   for detection in detections:
@@ -26,16 +27,16 @@ def process_detections(detections):
 
     for idx, conf, box in zip(detected_indices, detected_conf, detected_boxes):
       label = detection.names[idx]
-      if label not in results:
-        results[label] = {
-          "freq": 0,
-          "conf": [],
-          "boxes": []
-        }
-      results[label]["freq"] += 1
-      results[label]["conf"].append(conf.tolist())
-      results[label]["boxes"].append(box.tolist())
-
+      if conf > conf_threshold:
+        if label not in results:
+          results[label] = {
+            "freq": 0,
+            "conf": [],
+            "boxes": []
+          }
+        results[label]["freq"] += 1
+        results[label]["conf"].append(conf.tolist())
+        results[label]["boxes"].append(box.tolist())
   return results
 
 @app.route("/upload", methods=["POST"])
