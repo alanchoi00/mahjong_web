@@ -1,0 +1,58 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+header {
+  text-align: center;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+header h1 {
+  margin: 0;
+  font-size: 2em;
+  color: #444;
+}
+.container {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+}
+.card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  box-sizing: border-box;
+}
+.card h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+.card img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin-top: 5px;
+}
+
+.mahjong-theme {
+  border: 2px solid #e0e0e0;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #fafafa;
+}
+.mahjong-theme h2 {
+  font-family: 'Roboto', sans-serif;
+  color: #444;
+}
+.mahjong-theme h3 {
+  font-family: 'Roboto', sans-serif;
+  color: #313131;
+}
+.mahjong-theme p {
+  font-family: 'Roboto', sans-serif;
+  color: #666;
+}
