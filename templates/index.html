@@ -5,8 +5,10 @@
   <div class="card mahjong-theme" style="width: 30%;">
     <h2>File Upload</h2>
     <form action="/" method="POST" enctype="multipart/form-data" class="upload-form">
-      <label for="file">Choose File</label>
-      <input type="file" id="file" name="file" required>
+      <div class="mb-3">
+        <label for="formFile" class="form-label">Choose a jpg file</label>
+        <input class="form-control" type="file" id="formFile" name="upload_file" accept="image/jpg">
+      </div>
       <button type="submit">Upload</button>
     </form>
     {% if upload %}

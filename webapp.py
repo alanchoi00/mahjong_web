@@ -51,8 +51,8 @@ def process_detections(detections):
 @app.route("/", methods=["GET", "POST"])
 def predict_img():
   if request.method == "POST":
-    if 'file' in request.files:
-      f = request.files['file']
+    if 'upload_file' in request.files:
+      f = request.files['upload_file']
       basepath = os.path.dirname(__file__)
       filepath = os.path.join(basepath, UPLOAD_FOLDER, f.filename)
       print("Upload folder is ", filepath)
@@ -95,4 +95,4 @@ if __name__ == "__main__":
   parser.add_argument("--port", default=5000, type=int, help="port number")
   args = parser.parse_args()
   model = YOLO('yolov9c.pt')
-  app.run(host="0.0.0.0", port=args.port)
+  app.run(debug=True, host="0.0.0.0", port=args.port)
