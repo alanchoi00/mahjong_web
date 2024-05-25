@@ -4,7 +4,7 @@
 <div class="row row-cols-1 row-cols-md-2 g-4">
   <!-- Upload card -->
   <div id="upload-card" class="col w-25" style="min-width: 15rem;">
-    <div class="card border-secondary p-2">
+    <div class="card p-2">
       <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="formFile" class="form-label">Upload Image</label>
@@ -18,9 +18,9 @@
   </div>
   <!-- Result card -->
   <div id="result-card" class="col w-75">
-    <div class="card border-secondary">
+    <div class="card">
       <div class="card-header">Result</div>
-      <div class="m-2 position-relative">
+      <div class="my-2 mx-4 position-relative">
         <div id="img-load" class="placeholder-box" style="display: none;">
           <div class="spinner-grow" role="status" style="animation-duration: 2s;">
             <span class="visually-hidden">Loading...</span>
@@ -28,6 +28,10 @@
         </div>
         <img id="uploadImage" class="w-100 flex-shrink-1 rounded" alt="Uploaded Image" style="display: none;">
         <img id="predictImage" class="w-100 flex-shrink-1 rounded" alt="Prediction Image" style="display: none;">
+      </div>
+      <div class="card-footer">
+        <div id="result-info"></div>
+        <div id="tile-images" class="mt-2"></div>
       </div>
     </div>
   </div>
@@ -54,6 +58,8 @@
         contentType: false,
         processData: false,
         success: function(response) {
+          $('#result-info').empty();
+          $('#tile-images').empty();
           $('#img-load').show();
           $('#uploadImage').attr('src', response.upload_path).show();
           $('#predictImage').hide();
@@ -74,11 +80,43 @@
         $('#img-load').hide();
         $('#predictImage').attr('src', response.prediction_path).show();
         $('#uploadImage').hide();
+        displayResults(response.results);
       },
       error: function() {
         alert('Prediction failed');
       }
     });
   }
+
+  function displayResults(results) {
+    const tileOrder = [
+      'sd1', 'sd2', 'sd3', 'sd4', 'sd5', 'sd6', 'sd7', 'sd8', 'sd9',
+      'sb1', 'sb2', 'sb3', 'sb4', 'sb5', 'sb6', 'sb7', 'sb8', 'sb9',
+      'sc1', 'sc2', 'sc3', 'sc4', 'sc5', 'sc6', 'sc7', 'sc8', 'sc9',
+      'hwe', 'hws', 'hww', 'hwn', 'hdr', 'hdg', 'hdw',
+      'bs1', 'bs2', 'bs3', 'bs4',
+      'bf1', 'bf2', 'bf3', 'bf4'
+    ];
+
+    let resultInfoDiv = $('#result-info');
+    let tileImagesDiv = $('#tile-images');
+    resultInfoDiv.empty();
+    tileImagesDiv.empty();
+
+    if (results && Object.keys(results).length > 0) {
+      tileOrder.forEach(label => {
+        if (results[label]) {
+          let imgPath = `/static/assets/mahjong_tiles/${label}.png`;
+          for (let i = 0; i < results[label].freq; ++i) {
+            tileImagesDiv.append(`<img id="${label}-png" src="${imgPath}" alt="${label}">`);
+          }
+        }
+      });
+      resultInfoDiv.append('<h5>Detection Results</h5>');
+    } else {
+      resultInfoDiv.append('<p>No detections found.</p>');
+    }
+  }
+
 </script>
 {% endblock %}

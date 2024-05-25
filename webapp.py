@@ -12,20 +12,12 @@ DETECT_FOLDER = 'runs/detect'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(DETECT_FOLDER, exist_ok=True)
 
-tile_labels = [
-  'sd1', 'sd2', 'sd3', 'sd4', 'sd5', 'sd6', 'sd7', 'sd8', 'sd9',
-  'sb1', 'sb2', 'sb3', 'sb4', 'sb5', 'sb6', 'sb7', 'sb8', 'sb9',
-  'sc1', 'sc2', 'sc3', 'sc4', 'sc5', 'sc6', 'sc7', 'sc8', 'sc9',
-  'hwe', 'hws', 'hww', 'hwn', 'hdr', 'hdg', 'hdw',
-  'bs1', 'bs2', 'bs3', 'bs4',
-  'bf1', 'bf2', 'bf3', 'bf4'
-]
-
 @app.route("/")
 def index():
   return render_template('index.html')
 
 def process_detections(detections):
+  conf_threshold = 0.6
   results = {}
 
   for detection in detections:
@@ -35,16 +27,16 @@ def process_detections(detections):
 
     for idx, conf, box in zip(detected_indices, detected_conf, detected_boxes):
       label = detection.names[idx]
-      if label not in results:
-        results[label] = {
-          "freq": 0,
-          "conf": [],
-          "boxes": []
-        }
-      results[label]["freq"] += 1
-      results[label]["conf"].append(conf.tolist())
-      results[label]["boxes"].append(box.tolist())
-
+      if conf > conf_threshold:
+        if label not in results:
+          results[label] = {
+            "freq": 0,
+            "conf": [],
+            "boxes": []
+          }
+        results[label]["freq"] += 1
+        results[label]["conf"].append(conf.tolist())
+        results[label]["boxes"].append(box.tolist())
   return results
 
 @app.route("/upload", methods=["POST"])
