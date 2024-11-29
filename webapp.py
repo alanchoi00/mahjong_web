@@ -75,7 +75,8 @@ def detect_file(folder, filename):
   return send_from_directory(directory, filename)
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description="Flask app exposing YOLOv9 models")
-  parser.add_argument("--port", default=5000, type=int, help="port number")
-  args = parser.parse_args()
-  app.run(debug=True, host="0.0.0.0", port=args.port)
+  # parser = argparse.ArgumentParser(description="Flask app exposing YOLOv9 models")
+  # parser.add_argument("--port", default=5000, type=int, help="port number")
+  # args = parser.parse_args()
+  port = int(os.environ.get("PORT", 5000))
+  app.run(debug=True, host="0.0.0.0", port=port)
